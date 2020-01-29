@@ -844,7 +844,8 @@ IFileList* CFileSystem::createFileList()
 
 		// TODO: Should be unified once mingw adapts the proper types
 #if defined(__GNUC__)
-		long hFile; //mingw return type declaration
+		intptr_t hFile; // KIDSCODE - Avoid a crash if dllexported symbols in executable
+//		long hFile; //mingw return type declaration
 #else
 		intptr_t hFile;
 #endif
