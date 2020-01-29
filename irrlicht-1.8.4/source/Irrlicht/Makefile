@@ -111,6 +111,18 @@ sharedlib_win32 staticlib_win32: CPPFLAGS += -DNO_IRR_COMPILE_WITH_DIRECTINPUT_J
 sharedlib_win32 staticlib_win32: CPPFLAGS += -DIRR_COMPILE_WITH_DX9_DEV_PACK -D__GNUWIN32__ -D_WIN32 -DWIN32 -D_WINDOWS -D_MBCS -D_USRDLL
 staticlib_win32: CPPFLAGS += -D_IRR_STATIC_LIB_
 
+#>> KIDSCODE
+IRRLICHT_DLL64 := ../../bin/Win64-gcc/Irrlicht.dll
+sharedlib_win64 staticlib_win64: SYSTEM = Win64-gcc
+sharedlib_win64: LDFLAGS += -lgdi32 -lopengl32 -lwinmm -Wl,--add-stdcall-alias
+#choose either -DIRR_COMPILE_WITH_DX9_DEV_PACK or -DNO_IRR_COMPILE_WITH_DIRECT3D_9_ depending if you need dx9
+#sharedlib_win32 staticlib_win32: CPPFLAGS += -DIRR_COMPILE_WITH_DX9_DEV_PACK
+sharedlib_win64 staticlib_win64: CPPFLAGS += -DNO_IRR_COMPILE_WITH_DIRECTINPUT_JOYSTICK_ -DNO_IRR_COMPILE_WITH_DIRECT3D_9_
+#sharedlib_win64 staticlib_win64: CPPFLAGS += -DIRR_COMPILE_WITH_DX9_DEV_PACK -D__GNUWIN32__ -D_WIN32 -DWIN32 -D_WINDOWS -D_MBCS -D_USRDLL
+sharedlib_win64 staticlib_win64: CPPFLAGS += -D__GNUWIN32__ -D_WIN32 -DWIN32 -D_WINDOWS -D_MBCS -D_USRDLL
+staticlib_win64: CPPFLAGS += -D_IRR_STATIC_LIB_
+#<< KIDSCODE
+
 VERSION = $(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_RELEASE)
 SHARED_FULLNAME = $(SHARED_LIB).$(VERSION)
 SONAME = $(SHARED_LIB).$(VERSION_MAJOR).$(VERSION_MINOR)
@@ -142,6 +154,17 @@ sharedlib_win32: $(IRRLICHT_DLL)
 # Copies static lib into /lib/Win32-gcc
 staticlib_win32: $(STATIC_LIB)
 	cp $^ $(LIB_PATH)
+
+#>> KIDSCODE
+# Builds Irrlicht as dll (Irrlicht.dll) into ../../bin/Win64-gcc
+all_win64 win64: sharedlib_win64
+sharedlib_win64: $(IRRLICHT_DLL64)
+../../bin/Win64-gcc/Irrlicht.dll: $(LINKOBJ)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -shared -o $@ $^ $(LDFLAGS) -Wl,--out-implib,../../lib/Win64-gcc/$(STATIC_LIB)
+# Copies static lib into /lib/Win64-gcc
+staticlib_win64: $(STATIC_LIB)
+	cp $^ $(LIB_PATH)
+#<< KIDSCODE
 
 # Builds Irrlicht as shared lib (libIrrlicht.so.versionNumber) and copies it into /lib/MacOSX
 sharedlib_osx: $(LINKOBJ)
@@ -193,4 +216,3 @@ clean:
 	$(RM) $(LINKOBJ) $(SHARED_FULLNAME) $(STATIC_LIB) $(LINKOBJ:.o=.d)
 
 .PHONY: all sharedlib staticlib sharedlib_win32 staticlib_win32 help install clean
-
